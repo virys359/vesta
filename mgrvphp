@@ -1,0 +1,145 @@
+#!/bin/bash
+#
+echo "You can enter multiple versions through 'space'."
+echo "Enter php version/versions(for example 5.6.30):"
+read -p ">" vers
+echo "Create simlinks in /usr/bin?(y/N)"
+read -p ">" item1
+if ! [ -f /usr/local/vesta/web/index.php ]; then
+        echo 'VestaCP not install. Skip.'
+        else
+		if [ "$item1" == "y" ]||[ "$item1" == "Y" ]; then
+                	echo "Create VestaCP web templates?(y,N)"
+                	read -p ">" item2
+		fi
+fi
+
+if ! [ -f /opt/php/check ]; then
+	#Install dependencies
+	echo "Start the installation of packages and dependencies. Please wait..."; sleep 5
+	apt-get update 
+	apt-get install curl wget mysql-server make autoconf gcc bison libxml2 libxml2-dev libcurl4-openssl-dev pkg-config libssl-dev bzip2 libbz2-dev libjpeg-dev libpng-dev libxpm-dev libfreetype6-dev libgmp-dev libgmp3-dev libmcrypt-dev libmysqlclient-dev libpspell-dev librecode-dev libpcre3-dev libpcre++-dev libxslt1-dev libonig-dev libmcrypt-dev libreadline-dev libmhash-dev -y
+	ln -s /usr/include/qdbm/depot.h /usr/include/depot.h > /dev/null 2>&1
+	ln -s /usr/lib/libc-client.a /lib/x86_64-linux-gnu/libc-client.a > /dev/null 2>&1
+	ln -s /usr/lib/libc-client.a /usr/lib/x86_64-linux-gnu/libc-client.a > /dev/null 2>&1
+	mkdir /usr/include/freetype2/freetype > /dev/null 2>&1
+	ln -s /usr/include/freetype2/freetype.h /usr/include/freetype2/freetype/freetype.h > /dev/null 2>&1
+	mkdir /opt/ > /dev/null 2>&1
+	mkdir /opt/php/ > /dev/null 2>&1
+	touch /opt/php/check > /dev/null 2>&1
+	echo "this file create for phpmgr" > /opt/php/check
+	mkdir /opt/php/src > /dev/null 2>&1
+	mkdir /opt/php/src/bzips > /dev/null 2>&1
+fi
+
+for ver in $vers; do
+echo "Start install PHP" $ver
+sleep 5
+if ! [ -d /opt/php/src/php-$ver ]; then
+ if ! [ -f /opt/php/src/bzips/php-$ver.tar.bz2 ]; then
+ 	#Download src php
+ 	link=`curl http://php.net/releases/|grep $ver.tar.bz2|cut -d '"' -f2`
+ 	if [[ $link = "" ]]
+ 	then
+ 		link=`curl http://php.net/downloads.php|grep $ver.tar.bz2|cut -d '"' -f2` 
+ 		link=`echo "http://php.net"$link`
+		links=`curl $link|grep $ver.tar.bz2|cut -d '"' -f4`
+			for link in $links; do
+			wget -O /opt/php/src/bzips/php-$ver.tar.bz2 $link
+			if [ -f /opt/php/src/bzips/php-$ver.tar.bz2 ]; then
+				break
+			fi
+			done
+ 	else
+ 		l1=`echo $link| sed 's/^\(.\).*/\1/'`
+ 		if [ $l1 = "/" ]
+ 		then 
+ 			link=`echo "http://php.net"$link`
+			links=`curl $link|grep $ver.tar.bz2|cut -d '"' -f4`
+                        for link in $links; do
+                        wget -O /opt/php/src/bzips/php-$ver.tar.bz2 $link
+                        if [ -f /opt/php/src/bzips/php-$ver.tar.bz2 ]; then
+                                break
+                        fi
+                        done
+ 		fi
+ 	fi
+	if ! [ -f /opt/php/src/bzips/php-$ver.tar.bz2 ]; then
+	 	wget -O /opt/php/src/bzips/php-$ver.tar.bz2 $link
+	fi
+ 	if ! [ -f /opt/php/src/bzips/php-$ver.tar.bz2 ]; then
+ 		echo "PHP ${ver} not found"
+ 		echo "Please check correct version and re-run script"
+ 		exit 0
+ 	fi
+	tar xjf /opt/php/src/bzips/php-$ver.tar.bz2 -C /opt/php/src/
+        mkdir /opt/php/php-$ver > /dev/null 2>&1
+ else
+ 	tar xjf /opt/php/src/bzips/php-$ver.tar.bz2 -C /opt/php/src/
+ 	mkdir /opt/php/php-$ver > /dev/null 2>&1
+ fi
+fi
+
+# Configure, make and install
+if ! [ -f /opt/php/options ]; then
+ sl=`echo $ver|cut -d . -f 1``echo $ver|cut -d . -f 2`
+ if [[ $sl = "52" ]]
+ then
+	wget --no-check-certificate https://anikin.pw/files/options52 -O /opt/php/src/php-$ver/options.sh
+	cd /opt/php/src/php-$ver/
+	wget --no-check-certificate https://anikin.pw/files/php52-backports-20130717.patch
+	patch -p1 -i php52-backports-*.patch
+ else
+	wget --no-check-certificate https://anikin.pw/files/options -O /opt/php/src/php-$ver/options.sh
+ fi
+else
+ echo "/opt/php/options found"
+ cp /opt/php/options /opt/php/src/php-$ver/options.sh
+fi
+sed -i -e "s/version/${ver}/g" /opt/php/src/php-$ver/options.sh
+cd /opt/php/src/php-$ver/
+bash options.sh
+rez=`echo $?`
+if [[ $rez -ne 0 ]]
+	 then
+	 rm /opt/php/src/php-$ver/options.sh
+	 exit 0
+fi
+rm /opt/php/src/php-$ver/options.sh
+make
+make install
+
+#Check install php. Create simlinks and templates
+if ! [ -f /opt/php/php-$ver/bin/php-cgi ]; then
+ echo -e "Ops. Something is wrong.."
+ exit 0
+else
+ case "$item1" in
+    y|Y) echo "Create simlink"
+        rm /usr/bin/php$sl > /dev/null 2>&1
+	ln -s /opt/php/php-$ver/bin/php-cgi /usr/bin/php$sl
+	if test -f /usr/local/vesta/data/templates/web/apache2/php$sl.sh
+	then  echo "VestaCP web template found"
+	else
+		case "$item2" in
+		    y|Y) echo "Create template"
+			wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php$sl.sh https://anikin.pw/files/phpcgi.sh
+			chmod 755 /usr/local/vesta/data/templates/web/apache2/php$sl.sh
+			wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php$sl.stpl https://anikin.pw/files/phpcgi.stpl
+			wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php$sl.tpl https://anikin.pw/files/phpcgi.tpl
+			sed -i -e "s|/usr/bin/php-cgi|/usr/bin/php${sl}|g" /usr/local/vesta/data/templates/web/apache2/php$sl.sh
+				cgi=`apachectl -t -D DUMP_MODULES|grep cgi_module`
+				if [[ $cgi = "" ]]
+				then
+					a2enmod cgi
+					service apache2 restart
+				fi
+		;;
+		esac
+	fi
+ ;;
+ esac
+
+echo "PHP-${ver} installed in /php/php-"$ver
+fi
+done
