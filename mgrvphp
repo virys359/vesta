@@ -5,16 +5,16 @@ echo "Enter php version/versions(for example 5.6.30):"
 read -p ">" vers
 echo "Create simlinks in /usr/bin?(y/N)"
 read -p ">" item1
-if ! [ -f /usr/local/vesta/web/index.php ]; then
-        echo 'VestaCP not install. Skip.'
+if [ "$item1" == "y" ]||[ "$item1" == "Y" ]; then
+	if ! [ -f /usr/local/vesta/web/index.php ]; then
+			echo 'VestaCP not found. Skip.'
         else
-		if [ "$item1" == "y" ]||[ "$item1" == "Y" ]; then
                 	echo "Create VestaCP web templates?(y,N)"
                 	read -p ">" item2
-		fi
+	fi
 fi
 
-if ! [ -f /opt/php/check ]; then
+if ! [ -d /opt/php ]||! [ -d /opt/php/src ]||! [ -d /opt/php/src/bzips ]; then
 	#Install dependencies
 	echo "Start the installation of packages and dependencies. Please wait..."; sleep 5
 	apt-get update 
@@ -26,8 +26,6 @@ if ! [ -f /opt/php/check ]; then
 	ln -s /usr/include/freetype2/freetype.h /usr/include/freetype2/freetype/freetype.h > /dev/null 2>&1
 	mkdir /opt/ > /dev/null 2>&1
 	mkdir /opt/php/ > /dev/null 2>&1
-	touch /opt/php/check > /dev/null 2>&1
-	echo "this file create for phpmgr" > /opt/php/check
 	mkdir /opt/php/src > /dev/null 2>&1
 	mkdir /opt/php/src/bzips > /dev/null 2>&1
 fi
