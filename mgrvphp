@@ -1,5 +1,11 @@
 #!/bin/bash
-#
+
+# check root
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root"
+    exit 0
+fi
+
 echo "You can enter multiple versions through 'space'."
 echo "Enter php version/versions(for example 5.6.30):"
 read -p ">" vers
@@ -16,14 +22,19 @@ fi
 
 if ! [ -d /opt/php ]||! [ -d /opt/php/src ]||! [ -d /opt/php/src/bzips ]; then
 	#Install dependencies
-	echo "Start the installation of packages and dependencies. Please wait..."; sleep 5
-	apt-get update 
-	apt-get install curl wget mysql-server make autoconf gcc bison libxml2 libxml2-dev libcurl4-openssl-dev pkg-config libssl-dev bzip2 libbz2-dev libjpeg-dev libpng-dev libxpm-dev libfreetype6-dev libgmp-dev libgmp3-dev libmcrypt-dev libmysqlclient-dev libpspell-dev librecode-dev libpcre3-dev libpcre++-dev libxslt1-dev libonig-dev libmcrypt-dev libreadline-dev libmhash-dev -y
-	ln -s /usr/include/qdbm/depot.h /usr/include/depot.h > /dev/null 2>&1
-	ln -s /usr/lib/libc-client.a /lib/x86_64-linux-gnu/libc-client.a > /dev/null 2>&1
-	ln -s /usr/lib/libc-client.a /usr/lib/x86_64-linux-gnu/libc-client.a > /dev/null 2>&1
-	mkdir /usr/include/freetype2/freetype > /dev/null 2>&1
-	ln -s /usr/include/freetype2/freetype.h /usr/include/freetype2/freetype/freetype.h > /dev/null 2>&1
+	echo "If you select 'No', then you need to set the dependencies yourself. Otherwise, the installation will fail."
+	echo "Install packages and dependencies?"
+	read -p ">" item3
+	if [ "$item3" == "y" ]||[ "$item3" == "Y" ]; then
+		echo "Start the installation of packages and dependencies. Please wait..."; sleep 5
+		apt-get update 
+		apt-get install curl wget mysql-server make autoconf gcc bison libxml2 libxml2-dev libcurl4-openssl-dev pkg-config libssl-dev bzip2 libbz2-dev libjpeg-dev libpng-dev libxpm-dev libfreetype6-dev libgmp-dev libgmp3-dev libmcrypt-dev libmysqlclient-dev libpspell-dev librecode-dev libpcre3-dev libpcre++-dev libxslt1-dev libonig-dev libmcrypt-dev libreadline-dev libmhash-dev -y
+		ln -s /usr/include/qdbm/depot.h /usr/include/depot.h > /dev/null 2>&1
+		ln -s /usr/lib/libc-client.a /lib/x86_64-linux-gnu/libc-client.a > /dev/null 2>&1
+		ln -s /usr/lib/libc-client.a /usr/lib/x86_64-linux-gnu/libc-client.a > /dev/null 2>&1
+		mkdir /usr/include/freetype2/freetype > /dev/null 2>&1
+		ln -s /usr/include/freetype2/freetype.h /usr/include/freetype2/freetype/freetype.h > /dev/null 2>&1
+	fi
 	mkdir /opt/ > /dev/null 2>&1
 	mkdir /opt/php/ > /dev/null 2>&1
 	mkdir /opt/php/src > /dev/null 2>&1
@@ -51,7 +62,7 @@ if ! [ -d /opt/php/src/php-$ver ]; then
  	else
  		l1=`echo $link| sed 's/^\(.\).*/\1/'`
  		if [ $l1 = "/" ]
- 		then 
+ 		then
  			link=`echo "http://php.net"$link`
 			links=`curl $link|grep $ver.tar.bz2|cut -d '"' -f4`
                         for link in $links; do
@@ -138,6 +149,6 @@ else
  ;;
  esac
 
-echo "PHP-${ver} installed in /php/php-"$ver
+echo "PHP-${ver} installed in /opt/php/php-"$ver
 fi
 done
