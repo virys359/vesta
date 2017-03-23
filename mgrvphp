@@ -149,6 +149,19 @@ else
  ;;
  esac
 
+mkdir /opt/php/php-$ver/etc/conf.d
+
+ioncube=`echo "/opt/php/ext/ioncube/ioncube_loader_lin_"``echo $ver|cut -d . -f 1``echo "."``echo $ver|cut -d . -f 2``echo ".so"`
+if [ -f $ioncube ]
+	then
+	echo "zend_extension = "$ioncube >> /opt/php/php-$ver/etc/conf.d/ext.ini
+fi
+opcache=`find /opt/php/php-$ver/ -name opcache.so`
+if [ -f $opcache ]
+	then
+	echo "zend_extension = "$opcache >> /opt/php/php-$ver/etc/conf.d/ext.ini
+fi
+
 echo "PHP-${ver} installed in /opt/php/php-"$ver
 fi
 done
