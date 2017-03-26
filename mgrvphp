@@ -15,7 +15,7 @@ if [ "$item1" == "y" ]||[ "$item1" == "Y" ]; then
 	if ! [ -f /usr/local/vesta/web/index.php ]; then
 			echo 'VestaCP not found. Skip.'
         else
-                	echo "Create VestaCP web templates?(y,N)"
+                	echo "Create VestaCP web templates?(y/N)"
                 	read -p ">" item2
 	fi
 fi
@@ -23,7 +23,7 @@ fi
 if ! [ -d /opt/php ]||! [ -d /opt/php/src ]||! [ -d /opt/php/src/bzips ]; then
 	#Install dependencies
 	echo "If you select 'No', then you need to set the dependencies yourself. Otherwise, the installation will fail."
-	echo "Install packages and dependencies?"
+	echo "Install packages and dependencies?(y/N)"
 	read -p ">" item3
 	if [ "$item3" == "y" ]||[ "$item3" == "Y" ]; then
 		echo "Start the installation of packages and dependencies. Please wait..."; sleep 5
