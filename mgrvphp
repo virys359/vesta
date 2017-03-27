@@ -127,7 +127,7 @@ else
     y|Y) echo "Create simlink"
         rm /usr/bin/php$sl > /dev/null 2>&1
 	ln -s /opt/php/php-$ver/bin/php-cgi /usr/bin/php$sl
-	if test -f /usr/local/vesta/data/templates/web/apache2/php$sl.sh
+	if [ -f /usr/local/vesta/data/templates/web/apache2/php$sl.sh ]||[ -f /usr/local/vesta/data/templates/web/apache2/php${sl}-fcgid.sh ]
 	then  echo "VestaCP web template found"
 	else
 		case "$item2" in
@@ -137,6 +137,14 @@ else
 			wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php$sl.stpl https://anikin.pw/files/phpcgi.stpl
 			wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php$sl.tpl https://anikin.pw/files/phpcgi.tpl
 			sed -i -e "s|/usr/bin/php-cgi|/usr/bin/php${sl}|g" /usr/local/vesta/data/templates/web/apache2/php$sl.sh
+
+			wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php${sl}-fcgid.sh https://anikin.pw/files/phpfcgid.sh
+                        chmod 755 /usr/local/vesta/data/templates/web/apache2/php${sl}-fcgid.sh
+                        wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php${sl}-fcgid.stpl https://anikin.pw/files/phpfcgid.stpl
+                        wget --no-check-certificate -O /usr/local/vesta/data/templates/web/apache2/php${sl}-fcgid.tpl https://anikin.pw/files/phpfcgid.tpl
+                        sed -i -e "s|/usr/bin/php-cgi|/usr/bin/php${sl}|g" /usr/local/vesta/data/templates/web/apache2/php${sl}-fcgid.sh
+
+
 				cgi=`apachectl -t -D DUMP_MODULES|grep cgi_module`
 				if [[ $cgi = "" ]]
 				then
