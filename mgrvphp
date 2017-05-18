@@ -39,6 +39,10 @@ if ! [ -d /opt/php ]||! [ -d /opt/php/src ]||! [ -d /opt/php/src/bzips ]; then
 	mkdir /opt/php/ > /dev/null 2>&1
 	mkdir /opt/php/src > /dev/null 2>&1
 	mkdir /opt/php/src/bzips > /dev/null 2>&1
+	wget --no-check-certificate http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz
+	tar -xzf ioncube_loaders_lin_x86-64.tar.gz
+	mkdir /opt/php/ext > /dev/null 2>&1
+	mv ./ioncube /opt/php/ext/
 fi
 
 for ver in $vers; do
@@ -170,6 +174,9 @@ if [ -f $opcache ]
 	echo "zend_extension = "$opcache >> /opt/php/php-$ver/etc/conf.d/ext.ini
 fi
 
-echo "PHP-${ver} installed in /opt/php/php-"$ver
+echo "-----------------------------------------------"
+echo "PHP-${ver} installed in /opt/php/php-${ver}"
+echo -e "\033[0;31mDonate now:\033[0m https://anikin.pw/donate.html"
+echo "-----------------------------------------------"
 fi
 done
