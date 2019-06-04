@@ -98,12 +98,12 @@ sl=`echo $ver|cut -d . -f 1``echo $ver|cut -d . -f 2`
 if ! [ -f /opt/php/options ]; then
  if [[ $sl = "52" ]]
  then
-	wget --no-check-certificate https://raw.githubusercontent.com/petranikin/mgrvphp/master/options52 -O /opt/php/src/php-$ver/options.sh
+	wget --no-check-certificate https://raw.githubusercontent.com/virys359/vesta/master/options52 -O /opt/php/src/php-$ver/options.sh
 	cd /opt/php/src/php-$ver/
-	wget --no-check-certificate https://raw.githubusercontent.com/petranikin/mgrvphp/master/php52-backports-20130717.patch
+	wget --no-check-certificate https://raw.githubusercontent.com/virys359/vesta/master/php52-backports-20130717.patch
 	patch -p1 -i php52-backports-*.patch
  else
-	wget --no-check-certificate https://raw.githubusercontent.com/petranikin/mgrvphp/master/options -O /opt/php/src/php-$ver/options.sh
+	wget --no-check-certificate https://raw.githubusercontent.com/virys359/vesta/master/options -O /opt/php/src/php-$ver/options.sh
  fi
 else
  echo "/opt/php/options found"
